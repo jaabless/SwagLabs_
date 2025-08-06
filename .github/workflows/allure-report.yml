@@ -22,17 +22,9 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      - name: Build Docker image
-        run: docker build -t selenium-tests .
-
-      - name: Run Selenium tests in container
-        run: docker run --name test-runner selenium-tests
-
-      - name: Copy allure-results from container
-        run: |
-          docker cp test-runner:/app/target/allure-results target/allure-results || true
-          docker rm test-runner || true
-      
+      - name: Run tests and generate Allure results
+        id: run-tests
+        run: mvn clean test
 
       - name: Upload Allure results as artifact
         if: always()
