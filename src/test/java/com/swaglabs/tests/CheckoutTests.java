@@ -5,6 +5,8 @@ import com.swaglabs.pages.CheckoutPage;
 import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,7 +35,8 @@ public class CheckoutTests extends BaseTest {
 
     @ParameterizedTest
     @MethodSource("com.swaglabs.data.CheckoutTestData#checkoutTestData")
-    @Description("Test checkout functionality with various form inputs")
+    @DisplayName("Test checkout functionality with various form inputs")
+    @Story("Checkout")
     @Severity(SeverityLevel.CRITICAL)
     public void testCheckoutForm(String firstName, String lastName, String zipCode, boolean shouldSucceed, String expectedResult) {
         loginAndAddToCart();
@@ -53,7 +56,8 @@ public class CheckoutTests extends BaseTest {
     }
 
     @Test
-    @Description("Verify checkout without login redirects to login page")
+    @DisplayName("Verify checkout without login redirects to login page")
+    @Story("Checkout")
     @Severity(SeverityLevel.NORMAL)
     public void testCheckoutWithoutLogin() {
         driver.get("https://www.saucedemo.com/checkout-step-one.html");
