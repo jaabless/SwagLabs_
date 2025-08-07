@@ -35,7 +35,7 @@ jobs:
           fi
 
   notify:
-    needs: [ build-and-test, deploy-allure-report ]
+    needs: [ build-and-test]
     if: always()
     runs-on: ubuntu-latest
     steps:
