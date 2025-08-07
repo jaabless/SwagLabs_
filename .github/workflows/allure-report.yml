@@ -22,3 +22,29 @@ jobs:
 
       - name: Run tests inside container
         run: docker run --rm my-maven-app
+
+      - name: Set test result message
+        id: set-message
+        run: |
+          if [ "${{ steps.run-tests.outcome }}" == "success" ]; then
+            echo "✅ All tests passed successfully for $GITHUB_REPOSITORY on branch $GITHUB_REF"
+            echo "message=✅ All tests passed successfully for $GITHUB_REPOSITORY on branch $GITHUB_REF" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Some tests failed in $GITHUB_REPOSITORY on branch $GITHUB_REF"
+            echo "message=❌ Some tests failed in $GITHUB_REPOSITORY on branch $GITHUB_REF" >> $GITHUB_OUTPUT
+          fi
+
+  notify:
+    needs: [ build-and-test, deploy-allure-report ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.build-and-test.result }}
+          text: ${{ needs.build-and-test.outputs.buildStatusMessage }}
+          fields: repo,message,commit,author,action,eventName,ref
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.NEWSLETTER_CHANNEL }}
+
