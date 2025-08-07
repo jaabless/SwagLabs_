@@ -3,30 +3,40 @@ package com.swaglabs.base;
 import com.swaglabs.pages.LoginPage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+
 import java.time.Duration;
-import org.openqa.selenium.WebDriver;;
+
 public class BaseTest {
     protected static WebDriver driver;
     protected static LoginPage loginPage;
 
     @BeforeEach
     public void setupDriver() {
-        // Detect OS
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("win")) {
-            System.setProperty("webdriver.chrome.driver", "resources/chromedriver.exe");
-        }
-
+        // Setup Chrome options
         ChromeOptions options = new ChromeOptions();
-        if (!os.contains("win")) {
-            options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage");
-        }
 
+        // Add arguments for Docker/Linux compatibility
+        options.addArguments("--headless"); // Headless mode
+        options.addArguments("--no-sandbox"); // Required in Docker
+        options.addArguments("--disable-dev-shm-usage"); // Avoid shared memory issues
+        options.addArguments("--remote-allow-origins=*"); // Fix for some newer ChromeDriver issues
+
+        // Optional: mute logs
+        options.addArguments("--disable-logging");
+        options.addArguments("--log-level=3");
+
+        // Set driver
         driver = new ChromeDriver(options);
-        driver.get("https://www.saucedemo.com/");
+
+        // Basic setup
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        driver.manage().window().maximize();
+        driver.get("https://www.saucedemo.com/");
+
+        // Initialize login page
         loginPage = new LoginPage(driver);
     }
 
