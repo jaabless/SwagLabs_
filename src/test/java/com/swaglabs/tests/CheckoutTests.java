@@ -2,7 +2,6 @@ package com.swaglabs.tests;
 
 
 import com.swaglabs.pages.CheckoutPage;
-import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
@@ -34,11 +33,33 @@ public class CheckoutTests extends BaseTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.swaglabs.data.CheckoutTestData#checkoutTestData")
-    @DisplayName("Test checkout functionality with various form inputs")
+    @MethodSource("com.swaglabs.data.CheckoutTestData#validCheckoutTestData")
+    @DisplayName("Verify that checkout with valid data completes successfully")
     @Story("Checkout")
     @Severity(SeverityLevel.CRITICAL)
-    public void testCheckoutForm(String firstName, String lastName, String zipCode, boolean shouldSucceed, String expectedResult) {
+    public void testCheckoutWithValidData(String firstName, String lastName, String zipCode, boolean shouldSucceed, String expectedResult) {
+        loginAndAddToCart();
+        CheckoutPage checkoutPage = new CheckoutPage(driver);
+        assertTrue(checkoutPage.isCheckoutInfoPageDisplayed(), "Checkout info page not displayed");
+
+        checkoutPage.enterCheckoutInfo(firstName, lastName, zipCode);
+        checkoutPage.clickContinue();
+
+        if (shouldSucceed) {
+            checkoutPage.clickFinish();
+            assertTrue(checkoutPage.isConfirmationPageDisplayed(), "Confirmation page not displayed");
+            assertTrue(checkoutPage.getConfirmationMessage().contains("Thank you for your order"), "Unexpected confirmation message");
+        } else {
+            assertEquals(expectedResult, checkoutPage.getErrorMessage(), "Unexpected error message");
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.swaglabs.data.CheckoutTestData#invalidCheckoutTestData")
+    @DisplayName("Verify that checkout fails with invalid form inputs")
+    @Story("Checkout")
+    @Severity(SeverityLevel.CRITICAL)
+    public void testCheckoutWithInvalidData(String firstName, String lastName, String zipCode, boolean shouldSucceed, String expectedResult) {
         loginAndAddToCart();
         CheckoutPage checkoutPage = new CheckoutPage(driver);
         assertTrue(checkoutPage.isCheckoutInfoPageDisplayed(), "Checkout info page not displayed");
@@ -56,7 +77,7 @@ public class CheckoutTests extends BaseTest {
     }
 
     @Test
-    @DisplayName("Verify checkout without login redirects to login page")
+    @DisplayName("Verify that checkout without login redirects to login page")
     @Story("Checkout")
     @Severity(SeverityLevel.NORMAL)
     public void testCheckoutWithoutLogin() {
